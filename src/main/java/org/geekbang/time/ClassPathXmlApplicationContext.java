@@ -10,36 +10,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ClassPathXmlApplicationContext {
-    private List<BeanDefinition> beanDefinitions = new ArrayList<>();
-    private Map<String, Object> singletons = new HashMap<>();
+public class ClassPathXmlApplicationContext implements BeanFactory {
+    private BeanFactory beanFactory;
 
     public ClassPathXmlApplicationContext(String fileName) throws Exception {
-        this.readXml(fileName);
-        this.instanceBeans();
+        Resource resource = new ClassPathXmlResource(fileName);
+        BeanFactory beanFactory = new SimpleBeanFactory();
+        XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+        reader.loadBeanDefinitions(resource);
+        this.beanFactory = beanFactory;
     }
 
-    private void instanceBeans() throws Exception  {
-        for (BeanDefinition beanDefinition : beanDefinitions) {
-            singletons.put(beanDefinition.getId(), Class.forName(beanDefinition.getClassName()).newInstance());
-        }
+    @Override
+    public Object getBean(String beanName) throws BeansException {
+        return this.beanFactory.getBean(beanName);
     }
 
-    private void readXml(String fileName) throws Exception {
-        SAXReader saxReader = new SAXReader();
-        URL xmlPath = this.getClass().getClassLoader().getResource(fileName);
-        Document document = saxReader.read(xmlPath);
-        Element rootElement = document.getRootElement();
-        for (Element element : (List<Element>)rootElement.elements()) {
-            String id = element.attributeValue("id");
-            String className = element.attributeValue("class");
-            BeanDefinition beanDefinition = new BeanDefinition(id, className);
-            beanDefinitions.add(beanDefinition);
-        }
+    @Override
+    public void registerBeanDefinition(BeanDefinition beanDefinition) {
+        this.beanFactory.registerBeanDefinition(beanDefinition);
     }
-
-    public Object getBean(String beanName) {
-        return singletons.get(beanName);
-    }
-
 }
