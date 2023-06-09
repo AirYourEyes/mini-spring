@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <beans>
-    <bean id="aService" class="org.geekbang.test.AServiceImpl"></bean>
+    <bean id="baseBaseService" class="org.geekbang.test.BaseBaseServiceImpl">
+        <property name="aService" type="org.geekbang.test.AService" ref="aService"></property>
+    </bean>
+
+    <bean id="aService" class="org.geekbang.test.AServiceImpl">
+        <construct-arg type="String" name="name" value="abc"></construct-arg>
+        <construct-arg type="int" name="level" value="3"></construct-arg>
+        <property type="String" name="property1" value="Someone says"></property>
+        <property type="String" name="property2" value="Hello World!"></property>
+        <property type="org.geekbang.test.BaseService" name="baseService" ref="baseService"></property>
+    </bean>
+
+    <bean id="baseService" class="org.geekbang.test.BaseServiceImpl">
+        <property name="baseBaseService" type="org.geekbang.test.BaseBaseService" ref="baseBaseService"></property>
+    </bean>
 </beans>

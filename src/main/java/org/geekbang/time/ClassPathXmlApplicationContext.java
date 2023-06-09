@@ -1,24 +1,22 @@
 package org.geekbang.time;
 
-import org.dom4j.Document;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
-
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-public class ClassPathXmlApplicationContext implements BeanFactory {
-    private BeanFactory beanFactory;
+public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationEventPublisher {
+    private SimpleBeanFactory beanFactory;
 
     public ClassPathXmlApplicationContext(String fileName) throws Exception {
+        this(fileName, true);
+    }
+
+    public ClassPathXmlApplicationContext(String fileName, boolean isRefresh) throws Exception {
         Resource resource = new ClassPathXmlResource(fileName);
-        BeanFactory beanFactory = new SimpleBeanFactory();
+        SimpleBeanFactory beanFactory = new SimpleBeanFactory();
         XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
         reader.loadBeanDefinitions(resource);
         this.beanFactory = beanFactory;
+
+        if (isRefresh) {
+            beanFactory.refresh();
+        }
     }
 
     @Override
@@ -27,7 +25,37 @@ public class ClassPathXmlApplicationContext implements BeanFactory {
     }
 
     @Override
-    public void registerBeanDefinition(BeanDefinition beanDefinition) {
+    public void registerBeanDefinition(BeanDefinition beanDefinition) throws BeansException {
         this.beanFactory.registerBeanDefinition(beanDefinition);
+    }
+
+    @Override
+    public boolean containsBean(String name) {
+        return this.beanFactory.containsBean(name);
+    }
+
+    @Override
+    public void registerBean(String beanName, Object obj) {
+        this.registerBean(beanName, obj);
+    }
+
+    @Override
+    public boolean isSingleton(String name) {
+        return this.beanFactory.isSingleton(name);
+    }
+
+    @Override
+    public boolean isPrototype(String name) {
+        return this.beanFactory.isPrototype(name);
+    }
+
+    @Override
+    public Class<?> getType(String name) {
+        return this.beanFactory.getType(name);
+    }
+
+    @Override
+    public void publishEvent(ApplicationEvent event) {
+
     }
 }
